@@ -1,6 +1,6 @@
 --- === CaptureHotkeys ===
 ---
---- Capture hotkeys assigned hotkeys and display them.
+--- Capture Spoon hotkeys as they are assigned, capture arbitrary hotkeys, and display them all.
 --- A Spoon for Hammerspoon.
 ---
 --- In your `~/.hammerspoon/init.lua`, ...  
@@ -18,6 +18,7 @@
 ---     ...
 
 local M = {}
+M.__index = M
 
 -- Metadata
 M.name = "CaptureHotkeys"
@@ -26,8 +27,6 @@ M.author = "Matthew Fallshaw <m@fallshaw.me>"
 M.license = "MIT - https://opensource.org/licenses/MIT"
 M.homepage = "https://github.com/matthewfallshaw/CaptureHotkeys.spoon"
 
--- TODO: M:capture(module_name, bind_spec)
--- TODO: Also handle spoon.AppHotkeys
 
 --- CaptureHotkeys.logger
 --- Variable
@@ -53,7 +52,7 @@ function M:html()
       color:#000;
       font-size:12px;
     }
-    li.title{ text-align:center;}
+    li.title{text-align:center;}
     ul, li{list-style: inside none; padding: 0 0 5px;}
     header{
       position: fixed;
@@ -64,10 +63,8 @@ function M:html()
       background-color:#eee;
       z-index:99;
     }
-    header hr,
-    .title{
-      padding: 15px;
-    }
+    header hr{padding: 15px 0px 0px 0px;}
+    .title{padding: 15px;}
     li.title{padding: 0  10px 15px}
     .content{
       padding: 0 0 15px;
@@ -93,9 +90,16 @@ function M:html()
       height: 0;
     }
     .cmdModifiers{
-      width: 100px;
-      padding-right: 15px;
+      width: 90px;
+      padding-right: 5px;
       text-align: right;
+      float: left;
+      font-weight: bold;
+    }
+    .cmdKey{
+      width: 20px;
+      padding-right: 0px;
+      text-align: left;
       float: left;
       font-weight: bold;
     }
@@ -134,12 +138,12 @@ end
 function M:spoonsToHtml()
   local html = ""
   local count = 0
-  for spoonname, hotkeys in pairs(self:hotkeys()) do
+  for spoonname, hotkeys in pairs(self.hotkeys) do
     count = count + 1
     html = html .. "<ul class='col col" .. count .. "'>"
     html = html .. "<li class='title'><strong>" .. spoonname .. "</strong></li>"
-    for function_key, map in pairs(hotkeys) do
-      html = html .. "<li><div class='cmdModifiers'>" .. table.concat(map.mods, ",") .. " " .. map.key .. "</div><div class='cmdtext'>" .. function_key .. "</div></li>"
+    for hotkey_action, key_map in pairs(hotkeys) do
+      html = html .. "<li><div class='cmdModifiers'>" .. table.concat(key_map.mods, ",") .. "</div><div class='cmdKey'>" .. key_map.key .. "</div><div class='cmdtext'>" .. hotkey_action .. "</div></li>"
     end
     html = html .. "</ul>"
   end
@@ -147,38 +151,50 @@ function M:spoonsToHtml()
 end
 
 
+-- Variables
+
+--- CaptureHotkeys.hotkeys
+--- Variable
+--- The captured hotkeys. 
+M.hotkeys = {}
+
+
+M.key_cleanup = setmetatable(
+  { command = "⌘", cmd = "⌘", alt = "⌥", opt = "⌥", ctrl = "⌃", shift = "⇧",
+    Left = "←", Right = "→", Up = "↑", Down = "↓", space = "␣" },
+  { __index = function(t, k) return k end })
+
+
 -- Module methods
 
---- CaptureHotkeys:hotkeys()
+--- CaptureHotkeys:capture()
 --- Method
---- The captured hotkeys. 
-function M:hotkeys()
-  local hotkeys = {}
-  local mod_cleanup = setmetatable(
-    { command = "⌘", cmd = "⌘", alt = "⌥", opt = "⌥", ctrl = "⌃", shift = "⇧" },
-    { __index = function(t, k) return k end })
-
-  for spoonname, s in pairs(spoon) do
-    if s.__hotkeys_map then
-      hotkeys[spoonname] = {}
-      local count = 0
-      for function_key, map in pairs(s.__hotkeys_map) do
-        local mods, hotkey = map[1], map[2]
-        for k,mod in pairs(mods) do mods[k] = mod_cleanup[mod] end
-        hotkeys[spoonname][function_key] = { mods = mod_cleanup[map[1]], key = map[2]}
-        count = count + 1
-      end
-      if count == 0 then hotkeys[spoonname] = nil end
-    end
+--- Manually capture non-Spoon hotkeys.
+---
+--- Parameters:
+---  * hotkey_group_name - a string
+---  * mapping - a table: { hotkey_action = { { mods }, "key" } }
+---      eg. `{["Toggle layout engine"] = { {"⌘", "⌥", "⌃", "⇧"}, "s" }}`
+--- 
+--- Returns:
+---  * The CaptureHotkeys object
+function M:capture(hotkey_group_name, mapping)
+  if not self.hotkeys[hotkey_group_name] then self.hotkeys[hotkey_group_name] = {} end
+  local count = 0
+  for hotkey_action, key_map in pairs(mapping) do
+    local mods, hotkey = key_map[1], M.key_cleanup[key_map[2]]
+    for k,mod in pairs(mods) do mods[k] = M.key_cleanup[mod] end
+    table.sort(mods)
+    self.hotkeys[hotkey_group_name][hotkey_action] = { mods = mods, key = hotkey}
+    count = count + 1
   end
-
-  return hotkeys
+  if count == 0 then self.hotkeys[hotkey_group_name] = nil end
 end
 
 
 --- CaptureHotkeys:start()
 --- Method
---- Starts CaptureHotkeys, capturing assigned hotkeys for later display.
+--- Starts capturing Spoon hotkeys assigned with :bindHotkeys().
 ---
 --- Parameters:
 ---  * None
@@ -186,20 +202,20 @@ end
 --- Returns:
 ---  * The CaptureHotkeys object
 function M:start()
-  self.__loadSpoon = hs.loadSpoon
-  function hs.loadSpoon(...)
-    obj = self.__loadSpoon(...)
+  local captureHotkeysSpoon = self                -- self will be shadowed by later function calls
+  captureHotkeysSpoon.__loadSpoon = hs.loadSpoon  -- preserve original hs.loadSpoon
+  function hs.loadSpoon(...)                      -- redefine hs.loadSpoon, decorating it with our collector
+    obj = captureHotkeysSpoon.__loadSpoon(...)      -- inside the loaded Spoon, call original hs.loadSpoon
 
-    obj.__bindHotkeys = obj.bindHotkeys
-    function obj:bindHotkeys(mapping)
-      self.__bindHotkeys(obj, mapping)
-      obj.__hotkeys_map = mapping
+    obj.__bindHotkeys = obj.bindHotkeys             -- preserve original bindHotkeys
+    function obj:bindHotkeys(mapping)               -- redefine bindHotkeys, decorating it with our collector
+      self.__bindHotkeys(obj, mapping)                -- call original bindHotkeys
+      captureHotkeysSpoon:capture(obj.name, mapping)  -- capture the mapping
     end
 
     return obj
   end
-
-  return self
+  return captureHotkeysSpoon
 end
 
 
@@ -277,7 +293,7 @@ end
 ---
 --- Returns:
 ---  * The CaptureHotkeys object
-function M:toggleList()
+function M:toggle()
   if self.visible then
     self:hide()
   else
@@ -291,7 +307,7 @@ function M:init()
   self.sheetView = hs.webview.new({x=0, y=0, w=0, h=0})
     :windowTitle("Hotkeys")
     :windowStyle({ "utility", "closable", "nonactivating" })
-    :allowGestures(true)
+    :allowMagnificationGestures(true)
     :allowNewWindows(false)
     :level(hs.drawing.windowLevels.modalPanel)
     :closeOnEscape(true)
@@ -326,7 +342,7 @@ M.defaultHotkeys = {
 ---   * top_left, top_right, bottom_left, bottom_right - resize and move the window to the corresponding quarter of the screen
 function M:bindHotkeys(mapping)
    local hotkeyDefinitions = {
-      show = function() self:toggleList() end,
+      show = function() self:toggle() end,
    }
    hs.spoons.bindHotkeysToSpec(hotkeyDefinitions, mapping)
    return self
