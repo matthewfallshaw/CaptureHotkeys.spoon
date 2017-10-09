@@ -31,124 +31,32 @@ M.homepage = "https://github.com/matthewfallshaw/CaptureHotkeys.spoon"
 --- CaptureHotkeys.logger
 --- Variable
 --- Logger object used within the Spoon. Can be accessed to set the default log level for the messages coming from the Spoon.
-local logger = hs.logger.new("Capture Hotkeys")
+M.logger = hs.logger.new("Capture Hotkeys")
 
 
--- Utility functions
-function M:html()
-  local html = [[
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <style type="text/css">
-    *{margin:0; padding:0;}
-    html, body{
-      background-color:#eee;
-      font-family: arial;
-      font-size: 13px;
-    }
-    a{
-      text-decoration:none;
-      color:#000;
-      font-size:12px;
-    }
-    li.title{text-align:center;}
-    ul, li{list-style: inside none; padding: 0 0 5px;}
-    header{
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height:48px;
-      background-color:#eee;
-      z-index:99;
-    }
-    header hr{padding: 15px 0px 0px 0px;}
-    .title{padding: 15px;}
-    li.title{padding: 0  10px 15px}
-    .content{
-      padding: 0 0 15px;
-      font-size:12px;
-      overflow:hidden;
-    }
-    .content.maincontent{
-      position: relative;
-      height: 577px;
-      margin-top: 46px;
-    }
-    .content > .col{
-      width: 23%;
-      padding:20px 0 20px 20px;
-    }
-
-    li:after{
-      visibility: hidden;
-      display: block;
-      font-size: 0;
-      content: " ";
-      clear: both;
-      height: 0;
-    }
-    .cmdModifiers{
-      width: 90px;
-      padding-right: 5px;
-      text-align: right;
-      float: left;
-      font-weight: bold;
-    }
-    .cmdKey{
-      width: 20px;
-      padding-right: 0px;
-      text-align: left;
-      float: left;
-      font-weight: bold;
-    }
-    .cmdtext{
-      float: left;
-      overflow: hidden;
-      width: 165px;
-    }
-    </style>
-    </head>
-    <body>
-    <header>
-    <div class="title"><strong>Hotkeys</strong></div>
-    <hr />
-    </header>
-    <div class="content maincontent">]] .. self:spoonsToHtml() .. [[</div>
-    <br>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.2/isotope.pkgd.min.js"></script>
-    <script type="text/javascript">
-    var elem = document.querySelector('.content');
-    var iso = new Isotope( elem, {
-      // options
-      itemSelector: '.col',
-      layoutMode: 'masonry'
-    });
-    </script>
-    </body>
-    </html>
-    ]]
-
-  return html
-end
-
-
-function M:spoonsToHtml()
-  local html = ""
-  local count = 0
-  for spoonname, hotkeys in pairs(self.hotkeys) do
-    count = count + 1
-    html = html .. "<ul class='col col" .. count .. "'>"
-    html = html .. "<li class='title'><strong>" .. spoonname .. "</strong></li>"
-    for hotkey_action, key_map in pairs(hotkeys) do
-      html = html .. "<li><div class='cmdModifiers'>" .. table.concat(key_map.mods, ",") .. "</div><div class='cmdKey'>" .. key_map.key .. "</div><div class='cmdtext'>" .. hotkey_action .. "</div></li>"
+-- Utility functions and tables
+function M.script_path(level)
+  local src
+  if level then
+    src = debug.getinfo(level,"S").source:sub(2)
+  else
+    local sources = {}
+    for level=1,5 do
+      src = debug.getinfo(level,"S").source:sub(2)
+      table.insert(sources, src)
+      if src:match("%.lua$") then
+        return src, src:match("(.+/)[^/]+")
+      end
     end
-    html = html .. "</ul>"
+    return nil, "{\"".. table.concat(sources, "\",\"") .."\"}"
   end
-  return html
+  return src
 end
+
+M.key_cleanup = setmetatable(
+  { command = "⌘", cmd = "⌘", alt = "⌥", opt = "⌥", ctrl = "⌃", shift = "⇧",
+    Left = "←", Right = "→", Up = "↑", Down = "↓", space = "␣" },
+  { __index = function(t, k) return k end })
 
 
 -- Variables
@@ -159,11 +67,17 @@ end
 M.hotkeys = {}
 
 
-M.key_cleanup = setmetatable(
-  { command = "⌘", cmd = "⌘", alt = "⌥", opt = "⌥", ctrl = "⌃", shift = "⇧",
-    Left = "←", Right = "→", Up = "↑", Down = "↓", space = "␣" },
-  { __index = function(t, k) return k end })
-
+--- CaptureHotkeys.hotkeys
+--- Variable
+--- Exporters for various formats. 
+---
+--- Currently:
+--- html - CaptureHotkeys.exporters.html:to_html() (or `…exporters.html()`)
+--- an HTML string used for the default hotkey view ( `CaptureHotkeys:show()` )
+---
+--- keyCue - spoon.CaptureHotkeys.exporters.keyCue.export_to_file() (or `…exporters.keyCue()`)
+--- write a custom shortcuts file for "KeyCue.app"[http://www.ergonis.com/products/keycue/] to `build/HammerspoonHotkeys.kcustom`
+M.exporters = {}
 
 -- Module methods
 
@@ -215,7 +129,7 @@ function M:start()
 
     return obj
   end
-  return captureHotkeysSpoon
+  return self
 end
 
 
@@ -261,7 +175,7 @@ function M:show()
     w = cres.w*0.85,
     h = cres.h*0.75
   })
-  self.sheetView:html(self:html())
+  self.sheetView:html(self.exporters.html:to_html())
   self.sheetView:show()
   self.visible = true
   return self
@@ -303,23 +217,9 @@ function M:toggle()
 end
 
 
-function M:init()
-  self.sheetView = hs.webview.new({x=0, y=0, w=0, h=0})
-    :windowTitle("Hotkeys")
-    :windowStyle({ "utility", "closable", "nonactivating" })
-    :allowMagnificationGestures(true)
-    :allowNewWindows(false)
-    :level(hs.drawing.windowLevels.modalPanel)
-    :closeOnEscape(true)
-
-  return self
-end
-
-
 --- CaptureHotkeys.defaultHotkeys
 --- Variable
---- Table containing a sample set of hotkeys that can be
---- assigned to the different operations. These are not bound
+--- Table containing a sample set of hotkeys that can be --- assigned to the different operations. These are not bound
 --- by default - if you want to use them you have to call:
 --- `spoon.CaptureHotkeys:bindHotkeys(spoon.CaptureHotkeys.defaultHotkeys)`
 --- after loading the spoon. Value:
@@ -346,6 +246,32 @@ function M:bindHotkeys(mapping)
    }
    hs.spoons.bindHotkeysToSpec(hotkeyDefinitions, mapping)
    return self
+end
+
+
+function M:init()
+  self.sheetView = hs.webview.new({x=0, y=0, w=0, h=0})
+    :windowTitle("Hotkeys")
+    :windowStyle({ "utility", "closable", "nonactivating" })
+    :allowMagnificationGestures(true)
+    :allowNewWindows(false)
+    :level(hs.drawing.windowLevels.modalPanel)
+    :closeOnEscape(true)
+
+  local _,script_dir = self.script_path()
+  self.exporters = {}
+  for _,format in pairs({"html", "keyCue"}) do
+    local script_file = script_dir .. "exporters/" .. format .. "Exporter.lua"
+    local f=io.open(script_file,"r")
+    if f~=nil then
+      io.close(f)
+      self.exporters[format] = dofile(script_file):init(self)
+    else
+      self.logger.e("Couldn't load ".. format .." exporter: ".. script_file .." not found")
+    end
+  end
+
+  return self
 end
 
 
