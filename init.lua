@@ -55,8 +55,15 @@ end
 
 M.key_cleanup = setmetatable(
   { command = "⌘", cmd = "⌘", alt = "⌥", opt = "⌥", ctrl = "⌃", shift = "⇧",
-    Left = "←", Right = "→", Up = "↑", Down = "↓", space = "␣" },
-  { __index = function(t, k) return k end })
+    left = "←", right = "→", up = "↑", down = "↓", space = "␣" },
+  { __index = function(t, k) return rawget(t, k:lower()) or k end })
+
+function M._cleanup(mods, hotkey)
+  hotkey = M.key_cleanup[hotkey]
+  for k,mod in pairs(mods) do mods[k] = M.key_cleanup[mod] end
+  table.sort(mods)
+  return mods, hotkey
+end
 
 
 -- Variables
@@ -81,28 +88,61 @@ M.exporters = {}
 
 -- Module methods
 
---- CaptureHotkeys:capture()
+--- CaptureHotkeys:bind(hotkey_group_name, hotkey_name, ...)
+--- Method
+--- Wrapper around hs.hotkey.bind, capturing hotkeys on the way.
+---
+--- Parameters:
+---  * hotkey_group_name - a string, the group heading in hotkey reports
+---  * hotkey_name - a string, the key name in hotkey reports
+---    * eg. `CaptureHotkeys:bind(hotkey_group_name, hotkey_name, { mods }, key, function)`
+---    * eg. `CaptureHotkeys:bind("Layout engine", "Toggle layout engine", {"⌘", "⌥", "⌃", "⇧"}, "s", function() ... end )`
+--- 
+--- Returns:
+---  * The bound hotkey
+function M:bind(hotkey_group_name, hotkey_name, ...)
+  hs.hotkey.bind(...)
+  local mods, key = M._cleanup(...)
+  M:capture(hotkey_group_name, hotkey_name, mods, key)
+end
+
+
+--- CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)
 --- Method
 --- Manually capture non-Spoon hotkeys.
 ---
 --- Parameters:
 ---  * hotkey_group_name - a string
----  * mapping - a table: { hotkey_action = { { mods }, "key" } }
----      eg. `{["Toggle layout engine"] = { {"⌘", "⌥", "⌃", "⇧"}, "s" }}`
+---  * action_and_bindSpec_map_or_hotkey_name -
+---    * if a table - { hotkey_name = { { mods }, "key" } [, ...]}
+---      * eg. `spoon.CaptureHotkeys:capture("Terminal", {
+---               ["Select tab n"] = { {"⌘"}, "n" },
+---               ["Select last tab"] = { {"⌘"}, "9" },
+---             })`
+---    * if a string - hotkey_name
+---      * eg. `spoon.CaptureHotkeys:capture("Stay", "Toggle layout engine or report frontmost window", {"⌘", "⌥", "⌃", "⇧"}, "s")`
 --- 
 --- Returns:
 ---  * The CaptureHotkeys object
-function M:capture(hotkey_group_name, mapping)
+function M:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)
   if not self.hotkeys[hotkey_group_name] then self.hotkeys[hotkey_group_name] = {} end
-  local count = 0
-  for hotkey_action, key_map in pairs(mapping) do
-    local mods, hotkey = key_map[1], M.key_cleanup[key_map[2]]
-    for k,mod in pairs(mods) do mods[k] = M.key_cleanup[mod] end
-    table.sort(mods)
-    self.hotkeys[hotkey_group_name][hotkey_action] = { mods = mods, key = hotkey}
-    count = count + 1
+
+  if type(action_and_bindSpec_map_or_hotkey_name) == "string" then
+    local hotkey_name = action_and_bindSpec_map_or_hotkey_name
+    local mods, hotkey = M._cleanup(...)
+    self.hotkeys[hotkey_group_name][hotkey_name] = { mods = mods, key = hotkey}
+  else
+    local action_and_bindSpec_map = action_and_bindSpec_map_or_hotkey_name
+    local count = 0
+    for hotkey_action, bindSpec in pairs(action_and_bindSpec_map) do
+      local mods, hotkey = bindSpec[1], M.key_cleanup[bindSpec[2]]
+      for k,mod in pairs(mods) do mods[k] = M.key_cleanup[mod] end
+      table.sort(mods)
+      self.hotkeys[hotkey_group_name][hotkey_action] = { mods = mods, key = hotkey}
+      count = count + 1
+    end
+    if count == 0 then self.hotkeys[hotkey_group_name] = nil end
   end
-  if count == 0 then self.hotkeys[hotkey_group_name] = nil end
 end
 
 

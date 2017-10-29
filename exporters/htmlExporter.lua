@@ -8,6 +8,8 @@ M = {}
 function M.to_html(hotkeys)
   local hotkeys = hotkeys or M.capture_hotkeys_spoon.hotkeys
 
+  -- Shameless theft (with modifications) from
+  -- https://github.com/Hammerspoon/Spoons/blob/master/Source/KSheet.spoon/init.lua
   local html = [[
     <!DOCTYPE html>
     <html>
@@ -35,7 +37,7 @@ function M.to_html(hotkeys)
       background-color:#eee;
       z-index:99;
     }
-    header hr{padding: 15px 0px 0px 0px;}
+    header hr{padding: 0px;}
     .title{padding: 15px;}
     li.title{padding: 0  10px 15px}
     .content{
@@ -50,7 +52,7 @@ function M.to_html(hotkeys)
     }
     .content > .col{
       width: 23%;
-      padding:20px 0 20px 20px;
+      padding:10px 0 10px 20px;
     }
 
     li:after{
@@ -113,12 +115,17 @@ function M:_html_fragment_hotkeys(hotkeys)
   local hotkeys = hotkeys or M.capture_hotkeys_spoon.hotkeys
 
   local html = ""
-  local count = 0
-  for spoonname, hotkeys in pairs(hotkeys) do
-    count = count + 1
-    html = html .. "<ul class='col col" .. count .. "'>"
-    html = html .. "<li class='title'><strong>" .. spoonname .. "</strong></li>"
-    for hotkey_action, key_map in pairs(hotkeys) do
+
+  local sorted_group_names = {}
+  for group_name, _ in pairs(hotkeys) do
+    sorted_group_names[#sorted_group_names+1] = group_name
+  end
+  table.sort(sorted_group_names)
+
+  for index, group_name in pairs(sorted_group_names) do
+    html = html .. "<ul class='col col" .. index .. "'>"
+    html = html .. "<li class='title'><strong>" .. group_name .. "</strong></li>"
+    for hotkey_action, key_map in pairs(hotkeys[group_name]) do
       html = html .. "<li><div class='cmdModifiers'>" .. table.concat(key_map.mods, ",") .. "</div><div class='cmdKey'>" .. key_map.key .. "</div><div class='cmdtext'>" .. hotkey_action .. "</div></li>"
     end
     html = html .. "</ul>"
