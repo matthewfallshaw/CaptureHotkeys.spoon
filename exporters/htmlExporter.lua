@@ -2,11 +2,34 @@
 
 M = {}
 
+function M:_html_fragment_hotkeys(hotkeys)
+  local hotkeys = hotkeys or self.capture_hotkeys_spoon.hotkeys
+
+  local html = ""
+
+  local sorted_group_names = {}
+  for group_name, _ in pairs(hotkeys) do
+    sorted_group_names[#sorted_group_names+1] = group_name
+  end
+  table.sort(sorted_group_names)
+
+  for index, group_name in pairs(sorted_group_names) do
+    html = html .. "<ul class='col col" .. index .. "'>"
+    html = html .. "<li class='title'><strong>" .. group_name .. "</strong></li>"
+    for hotkey_action, key_map in pairs(hotkeys[group_name]) do
+      html = html .. "<li><div class='cmdModifiers'>" .. table.concat(key_map.mods, ",") .. "</div><div class='cmdKey'>" .. key_map.key .. "</div><div class='cmdtext'>" .. hotkey_action .. "</div></li>"
+    end
+    html = html .. "</ul>"
+  end
+  return html
+end
+
+
 --- CaptureHotkeys.exporters.html
 --- Function
 --- Export captured hotkeys as html.
-function M.to_html(hotkeys)
-  local hotkeys = hotkeys or M.capture_hotkeys_spoon.hotkeys
+function M:to_html(hotkeys)
+  local hotkeys = hotkeys or self.capture_hotkeys_spoon.hotkeys
 
   -- Shameless theft (with modifications) from
   -- https://github.com/Hammerspoon/Spoons/blob/master/Source/KSheet.spoon/init.lua
@@ -90,7 +113,7 @@ function M.to_html(hotkeys)
     <hr />
     </header>
     <div class="content maincontent">
-    ]] .. M._html_fragment_hotkeys(hotkeys) .. [[
+    ]] .. self:_html_fragment_hotkeys(hotkeys) .. [[
     </div>
     <br>
 
@@ -110,32 +133,9 @@ function M.to_html(hotkeys)
   return html
 end
 
-
-function M:_html_fragment_hotkeys(hotkeys)
-  local hotkeys = hotkeys or M.capture_hotkeys_spoon.hotkeys
-
-  local html = ""
-
-  local sorted_group_names = {}
-  for group_name, _ in pairs(hotkeys) do
-    sorted_group_names[#sorted_group_names+1] = group_name
-  end
-  table.sort(sorted_group_names)
-
-  for index, group_name in pairs(sorted_group_names) do
-    html = html .. "<ul class='col col" .. index .. "'>"
-    html = html .. "<li class='title'><strong>" .. group_name .. "</strong></li>"
-    for hotkey_action, key_map in pairs(hotkeys[group_name]) do
-      html = html .. "<li><div class='cmdModifiers'>" .. table.concat(key_map.mods, ",") .. "</div><div class='cmdKey'>" .. key_map.key .. "</div><div class='cmdtext'>" .. hotkey_action .. "</div></li>"
-    end
-    html = html .. "</ul>"
-  end
-  return html
-end
-
 function M:init(capture_hotkeys_spoon)
-  M.capture_hotkeys_spoon = assert(capture_hotkeys_spoon, "Parent spoon.CaptureHotkeys must be supplied")
-  setmetatable(M, { __call = M.to_html, })
+  self.capture_hotkeys_spoon = assert(capture_hotkeys_spoon, "Parent spoon.CaptureHotkeys must be supplied")
+  setmetatable(M, { __call = self.to_html, })
   return self
 end
 
