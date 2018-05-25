@@ -16,6 +16,7 @@ M.modifierKeys = {
   ["⌘"] = M.keyCueModifierFlags.NSEventModifierFlagCommand,
   ["⇧"] = M.keyCueModifierFlags.NSEventModifierFlagShift,
   ["⌃"] = M.keyCueModifierFlags.NSEventModifierFlagControl,
+  ["^"] = M.keyCueModifierFlags.NSEventModifierFlagControl,
   ["⌥"] = M.keyCueModifierFlags.NSEventModifierFlagOption,
 }
 M.keyCodes = setmetatable({
@@ -91,7 +92,7 @@ function M._write_kcustom(f, hotkeys)
       else
         optflag = hs.fnutils.reduce(keys.mods, function(a,b)
           local x = ((type(a) == "number") and a or M.modifierKeys[a])
-          assert(type(x) == "number", x.." isn't a number")
+          assert(type(x) == "number", tostring(x).." isn't a number")
           return x + M.modifierKeys[b]
         end)
       end
