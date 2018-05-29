@@ -159,7 +159,7 @@ function M:start()
   local captureHotkeysSpoon = self                -- self will be shadowed by later function calls
   captureHotkeysSpoon.__loadSpoon = hs.loadSpoon  -- preserve original hs.loadSpoon
   function hs.loadSpoon(...)                      -- redefine hs.loadSpoon, decorating it with our collector
-    obj = captureHotkeysSpoon.__loadSpoon(...)      -- inside the loaded Spoon, call original hs.loadSpoon
+    local obj = captureHotkeysSpoon.__loadSpoon(...)      -- inside the loaded Spoon, call original hs.loadSpoon
 
     obj.__bindHotkeys = obj.bindHotkeys             -- preserve original bindHotkeys
     function obj:bindHotkeys(mapping)               -- redefine bindHotkeys, decorating it with our collector
