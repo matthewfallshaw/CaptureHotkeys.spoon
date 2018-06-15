@@ -74,7 +74,7 @@ end
 M.hotkeys = {}
 
 
---- CaptureHotkeys.hotkeys
+--- CaptureHotkeys.exporters
 --- Variable
 --- Exporters for various formats. 
 ---
