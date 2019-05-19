@@ -1,6 +1,12 @@
 -- Export Hotkeys to KeyCue properties file format
 
-local M = {}
+local M = {
+  build_dir = 'build',
+  file_name = 'HammerspoonHotkeys.kcustom',
+}
+
+local logger = hs.logger.new('CHKs KeyCue exporter')
+M.logger = logger
 
 M.keyCueModifierFlags = {
   NSEventModifierFlagCapsLock   = 1 << 16, -- Set if Caps Lock key is pressed.
@@ -49,9 +55,9 @@ function M.default_output_file_path()
   local srcfile,srcdir = M._script_path()
   local hsdir = assert(srcdir:match("^(/.+/)Spoons")) or (hs.execute("pwd"))
 
-  local outputdir = (hsdir.."build/")
+  local outputdir = (hsdir..M.build_dir.."/")
   hs.execute("mkdir -p "..outputdir)
-  return outputdir .. "HammerspoonHotkeys.kcustom"
+  return outputdir .. M.file_name
 end
 
 function M:export_to_file(file_path, hotkeys)
@@ -62,10 +68,18 @@ function M:export_to_file(file_path, hotkeys)
 
   self._write_kcustom(output_file, hotkeys)
   output_file:close()
+  logger.i('KeyCue mapping file written to '.. file_path)
   return true
 end
 
 function M._write_kcustom(f, hotkeys)
+  local revHtmlEntities = {}
+  for e, u in pairs(hs.http.htmlEntities) do revHtmlEntities[u] = e end
+
+  local fix = function(str)
+    return (string.gsub(str, '.', function(c) return revHtmlEntities[c] end))
+  end
+
   f:write([[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -76,11 +90,11 @@ function M._write_kcustom(f, hotkeys)
 	<array>
 ]])
   for heading,hkeys in pairs(hotkeys) do
-    f:write([[<dict>
+    f:write([[		<dict>
 			<key>heading</key>
 			<true/>
 			<key>title</key>
-			<string>]] .. heading .. [[</string>
+			<string>]] .. fix(heading) .. [[</string>
 		</dict>
 ]])
     for action,keys in pairs(hkeys) do
@@ -99,20 +113,20 @@ function M._write_kcustom(f, hotkeys)
       assert(optflag, "optflag nil; keys.mods " .. table.concat(keys.mods, ","))
       assert(type(optflag) == "number", optflag)
       assert(action)
-      f:write([[<dict>
+      f:write([[		<dict>
 			<key>keycode</key>
 			<integer>]] .. keycode .. [[</integer>
 			<key>modifiers</key>
 			<integer>]] .. optflag .. [[</integer>
 			<key>title</key>
-			<string>]] .. action .. [[</string>
+			<string>]] .. fix(action) .. [[</string>
 		</dict>
 ]])
     end
   end
-  f:write([[</array>
-  </dict>
-  </plist>]])
+  f:write([[	</array>
+</dict>
+</plist>]])
 end
 
 function M:init(capture_hotkeys_spoon)
