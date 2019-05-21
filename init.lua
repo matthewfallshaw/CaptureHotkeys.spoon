@@ -31,18 +31,19 @@ M.homepage = "https://github.com/matthewfallshaw/CaptureHotkeys.spoon"
 --- CaptureHotkeys.logger
 --- Variable
 --- Logger object used within the Spoon. Can be accessed to set the default log level for the messages coming from the Spoon.
-M.logger = hs.logger.new("Capture Hotkeys")
+local logger = hs.logger.new("Capture Hotkeys")
+M.logger = logger
 
 
 -- Utility functions and tables
-function M.script_path(level)
+local function script_path(level)
   local src
   if level then
     src = debug.getinfo(level,"S").source:sub(2)
   else
     local sources = {}
-    for level=1,5 do
-      src = debug.getinfo(level,"S").source:sub(2)
+    for _level=1,5 do
+      src = debug.getinfo(_level,"S").source:sub(2)
       table.insert(sources, src)
       if src:match("%.lua$") then
         return src, src:match("(.+/)[^/]+")
@@ -58,7 +59,7 @@ M.key_cleanup = setmetatable(
     left = "←", right = "→", up = "↑", down = "↓", space = "␣" },
   { __index = function(t, k) return rawget(t, k:lower()) or k end })
 
-function M._cleanup(mods, hotkey)
+local function _cleanup(mods, hotkey)
   hotkey = M.key_cleanup[hotkey]
   for k,mod in pairs(mods) do mods[k] = M.key_cleanup[mod] end
   table.sort(mods)
@@ -102,7 +103,7 @@ M.exporters = {}
 ---  * The bound hotkey
 function M:bind(hotkey_group_name, hotkey_name, ...)
   hs.hotkey.bind(...)
-  local mods, key = M._cleanup(...)
+  local mods, key = _cleanup(...)
   M:capture(hotkey_group_name, hotkey_name, mods, key)
 end
 
@@ -129,7 +130,7 @@ function M:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ..
 
   if type(action_and_bindSpec_map_or_hotkey_name) == "string" then
     local hotkey_name = action_and_bindSpec_map_or_hotkey_name
-    local mods, hotkey = M._cleanup(...)
+    local mods, hotkey = _cleanup(...)
     self.hotkeys[hotkey_group_name][hotkey_name] = { mods = mods, key = hotkey}
   else
     local action_and_bindSpec_map = action_and_bindSpec_map_or_hotkey_name
@@ -218,6 +219,10 @@ function M:show()
   self.sheetView:html(self.exporters.html:to_html())
   self.sheetView:show()
   self.visible = true
+
+  local modal = self.hotkey_modal
+  modal:enter()
+
   return self
 end
 
@@ -234,6 +239,7 @@ end
 function M:hide()
   self.sheetView:hide()
   self.visible = false
+  self.hotkey_modal:exit()
   return self
 end
 
@@ -269,7 +275,7 @@ end
 ---  }
 --- ```
 M.defaultHotkeys = {
-   show = { {"ctrl", "alt", "cmd", "shift"}, "k" },
+  show = { {"ctrl", "alt", "cmd", "shift"}, "k" },
 }
 
 
@@ -281,11 +287,13 @@ M.defaultHotkeys = {
 ---  * mapping - A table containing hotkey objifier/key details for the following items:
 ---   * top_left, top_right, bottom_left, bottom_right - resize and move the window to the corresponding quarter of the screen
 function M:bindHotkeys(mapping)
-   local hotkeyDefinitions = {
-      show = function() self:toggle() end,
-   }
-   hs.spoons.bindHotkeysToSpec(hotkeyDefinitions, mapping)
-   return self
+  self.mapping = mapping
+
+  local hotkeyDefinitions = {
+    show = function() self:toggle() end,
+  }
+  hs.spoons.bindHotkeysToSpec(hotkeyDefinitions, mapping)
+  return self
 end
 
 
@@ -298,7 +306,22 @@ function M:init()
     :level(hs.drawing.windowLevels.modalPanel)
     :closeOnEscape(true)
 
-  local _,script_dir = self.script_path()
+  self.mapping = self.mapping or self.defaultHotkeys
+  self.hotkey_modal = hs.hotkey.modal.new()
+  self.hotkey_modal:bind({}, 'escape', nil, function() self:hide() end)
+  local parent = self
+  function self.hotkey_modal:entered()
+    logger.i('modal entered')
+    local types = hs.eventtap.event.types
+    self.eventtap = hs.eventtap.new({types.keyDown, types.leftMouseDown}, function(e) parent:hide() end)
+    self.eventtap:start()
+  end
+  function self.hotkey_modal:exited()
+    logger.i('modal exited')
+    self.eventtap:stop()
+  end
+
+  local _,script_dir = script_path()
   self.exporters = {}
   for _,format in pairs({"html", "keyCue"}) do
     local script_file = script_dir .. "exporters/" .. format .. "Exporter.lua"
@@ -307,7 +330,7 @@ function M:init()
       io.close(f)
       self.exporters[format] = dofile(script_file):init(self)
     else
-      self.logger.e("Couldn't load ".. format .." exporter: ".. script_file .." not found")
+      logger.e("Couldn't load ".. format .." exporter: ".. script_file .." not found")
     end
   end
 
