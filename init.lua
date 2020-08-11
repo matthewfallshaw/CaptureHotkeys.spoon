@@ -3,8 +3,8 @@
 --- Capture Spoon hotkeys as they are assigned, capture arbitrary hotkeys, and display them all.
 --- A Spoon for Hammerspoon.
 ---
---- In your `~/.hammerspoon/init.lua`, ...  
---- Add `hs.loadSpoon("CaptureHotkeys")` before any other Spoons or hotkeys you want to capture.  
+--- In your `~/.hammerspoon/init.lua`, ...
+--- Add `hs.loadSpoon("CaptureHotkeys")` before any other Spoons or hotkeys you want to capture.
 --- Assign a hotkey to display captured hotkeys: `spoon.CaptureHotkeys:bindHotkeys({show = {{ "⌘", "⌥", "⌃", "⇧" }, "k"}})`.
 --- Start capturing: `spoon.CaptureHotkeys:start()`
 --- Load your other spoons.
@@ -71,13 +71,13 @@ end
 
 --- CaptureHotkeys.hotkeys
 --- Variable
---- The captured hotkeys. 
+--- The captured hotkeys.
 M.hotkeys = {}
 
 
 --- CaptureHotkeys.exporters
 --- Variable
---- Exporters for various formats. 
+--- Exporters for various formats.
 ---
 --- Currently:
 --- html - CaptureHotkeys.exporters.html:to_html() (or `…exporters.html()`)
@@ -98,7 +98,7 @@ M.exporters = {}
 ---  * hotkey_name - a string, the key name in hotkey reports
 ---    * eg. `CaptureHotkeys:bind(hotkey_group_name, hotkey_name, { mods }, key, function)`
 ---    * eg. `CaptureHotkeys:bind("Layout engine", "Toggle layout engine", {"⌘", "⌥", "⌃", "⇧"}, "s", function() ... end )`
---- 
+---
 --- Returns:
 ---  * The bound hotkey
 function M:bind(hotkey_group_name, hotkey_name, ...)
@@ -122,7 +122,7 @@ end
 ---             })`
 ---    * if a string - hotkey_name
 ---      * eg. `spoon.CaptureHotkeys:capture("Stay", "Toggle layout engine or report frontmost window", {"⌘", "⌥", "⌃", "⇧"}, "s")`
---- 
+---
 --- Returns:
 ---  * The CaptureHotkeys object
 function M:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)

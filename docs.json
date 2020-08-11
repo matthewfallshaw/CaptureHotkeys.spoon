@@ -15,7 +15,9 @@
         "stripped_doc" : [
           "Logger object used within the Spoon. Can be accessed to set the default log level for the messages coming from the Spoon."
         ],
-        "def" : "CaptureHotkeys.logger",
+        "parameters" : [
+
+        ],
         "doc" : "Logger object used within the Spoon. Can be accessed to set the default log level for the messages coming from the Spoon.",
         "notes" : [
 
@@ -26,16 +28,16 @@
 
         ],
         "name" : "logger",
-        "parameters" : [
-
-        ]
+        "def" : "CaptureHotkeys.logger"
       },
       {
         "desc" : "The captured hotkeys.",
         "stripped_doc" : [
           "The captured hotkeys."
         ],
-        "def" : "CaptureHotkeys.hotkeys",
+        "parameters" : [
+
+        ],
         "doc" : "The captured hotkeys.",
         "notes" : [
 
@@ -46,14 +48,12 @@
 
         ],
         "name" : "hotkeys",
-        "parameters" : [
-
-        ]
+        "def" : "CaptureHotkeys.hotkeys"
       },
       {
         "desc" : "Exporters for various formats.",
         "stripped_doc" : [
-          "Exporters for various formats. ",
+          "Exporters for various formats.",
           "",
           "Currently:",
           "html - CaptureHotkeys.exporters.html:to_html() (or `…exporters.html()`)",
@@ -62,8 +62,10 @@
           "keyCue - spoon.CaptureHotkeys.exporters.keyCue.export_to_file() (or `…exporters.keyCue()`)",
           "write a custom shortcuts file for \"KeyCue.app\"[http:\/\/www.ergonis.com\/products\/keycue\/] to `build\/HammerspoonHotkeys.kcustom`"
         ],
-        "def" : "CaptureHotkeys.exporters",
-        "doc" : "Exporters for various formats. \n\nCurrently:\nhtml - CaptureHotkeys.exporters.html:to_html() (or `…exporters.html()`)\nan HTML string used for the default hotkey view ( `CaptureHotkeys:show()` )\n\nkeyCue - spoon.CaptureHotkeys.exporters.keyCue.export_to_file() (or `…exporters.keyCue()`)\nwrite a custom shortcuts file for \"KeyCue.app\"[http:\/\/www.ergonis.com\/products\/keycue\/] to `build\/HammerspoonHotkeys.kcustom`",
+        "parameters" : [
+
+        ],
+        "doc" : "Exporters for various formats.\n\nCurrently:\nhtml - CaptureHotkeys.exporters.html:to_html() (or `…exporters.html()`)\nan HTML string used for the default hotkey view ( `CaptureHotkeys:show()` )\n\nkeyCue - spoon.CaptureHotkeys.exporters.keyCue.export_to_file() (or `…exporters.keyCue()`)\nwrite a custom shortcuts file for \"KeyCue.app\"[http:\/\/www.ergonis.com\/products\/keycue\/] to `build\/HammerspoonHotkeys.kcustom`",
         "notes" : [
 
         ],
@@ -73,9 +75,7 @@
 
         ],
         "name" : "exporters",
-        "parameters" : [
-
-        ]
+        "def" : "CaptureHotkeys.exporters"
       },
       {
         "desc" : "Table containing a sample set of hotkeys that can be --- assigned to the different operations. These are not bound",
@@ -90,7 +90,9 @@
           " }",
           "```"
         ],
-        "def" : "CaptureHotkeys.defaultHotkeys",
+        "parameters" : [
+
+        ],
         "doc" : "Table containing a sample set of hotkeys that can be --- assigned to the different operations. These are not bound\nby default - if you want to use them you have to call:\n`spoon.CaptureHotkeys:bindHotkeys(spoon.CaptureHotkeys.defaultHotkeys)`\nafter loading the spoon. Value:\n```\n {\n   show = { {\"ctrl\", \"alt\", \"cmd\", \"shift\"}, \"k\" },\n }\n```",
         "notes" : [
 
@@ -101,23 +103,23 @@
 
         ],
         "name" : "defaultHotkeys",
-        "parameters" : [
-
-        ]
+        "def" : "CaptureHotkeys.defaultHotkeys"
       }
     ],
     "stripped_doc" : [
 
     ],
+    "desc" : "Capture Spoon hotkeys as they are assigned, capture arbitrary hotkeys, and display them all.",
     "Deprecated" : [
 
     ],
-    "desc" : "Capture Spoon hotkeys as they are assigned, capture arbitrary hotkeys, and display them all.",
     "type" : "Module",
     "Constructor" : [
 
     ],
-    "doc" : "Capture Spoon hotkeys as they are assigned, capture arbitrary hotkeys, and display them all.\nA Spoon for Hammerspoon.\n\nIn your `~\/.hammerspoon\/init.lua`, ...  \nAdd `hs.loadSpoon(\"CaptureHotkeys\")` before any other Spoons or hotkeys you want to capture.  \nAssign a hotkey to display captured hotkeys: `spoon.CaptureHotkeys:bindHotkeys({show = {{ \"⌘\", \"⌥\", \"⌃\", \"⇧\" }, \"k\"}})`.\nStart capturing: `spoon.CaptureHotkeys:start()`\nLoad your other spoons.\n\nExample `~\/.hammerspoon\/init.lua`:\n\n    hs.loadSpoon(\"CaptureHotkeys\")\n    spoon.CaptureHotkeys:bindHotkeys({show = {{ \"⌘\", \"⌥\", \"⌃\", \"⇧\" }, \"k\"}})\n    spoon.CaptureHotkeys:start()\n\n    ...",
+    "Field" : [
+
+    ],
     "Method" : [
       {
         "desc" : "Wrapper around hs.hotkey.bind, capturing hotkeys on the way.",
@@ -125,7 +127,13 @@
           "Wrapper around hs.hotkey.bind, capturing hotkeys on the way.",
           ""
         ],
-        "def" : "CaptureHotkeys:bind(hotkey_group_name, hotkey_name, ...)",
+        "parameters" : [
+          " * hotkey_group_name - a string, the group heading in hotkey reports",
+          " * hotkey_name - a string, the key name in hotkey reports",
+          "   * eg. `CaptureHotkeys:bind(hotkey_group_name, hotkey_name, { mods }, key, function)`",
+          "   * eg. `CaptureHotkeys:bind(\"Layout engine\", \"Toggle layout engine\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\", function() ... end )`",
+          ""
+        ],
         "doc" : "Wrapper around hs.hotkey.bind, capturing hotkeys on the way.\n\nParameters:\n * hotkey_group_name - a string, the group heading in hotkey reports\n * hotkey_name - a string, the key name in hotkey reports\n   * eg. `CaptureHotkeys:bind(hotkey_group_name, hotkey_name, { mods }, key, function)`\n   * eg. `CaptureHotkeys:bind(\"Layout engine\", \"Toggle layout engine\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\", function() ... end )`\n\nReturns:\n * The bound hotkey",
         "notes" : [
 
@@ -136,13 +144,7 @@
           " * The bound hotkey"
         ],
         "name" : "bind",
-        "parameters" : [
-          " * hotkey_group_name - a string, the group heading in hotkey reports",
-          " * hotkey_name - a string, the key name in hotkey reports",
-          "   * eg. `CaptureHotkeys:bind(hotkey_group_name, hotkey_name, { mods }, key, function)`",
-          "   * eg. `CaptureHotkeys:bind(\"Layout engine\", \"Toggle layout engine\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\", function() ... end )`",
-          ""
-        ]
+        "def" : "CaptureHotkeys:bind(hotkey_group_name, hotkey_name, ...)"
       },
       {
         "desc" : "Manually capture non-Spoon hotkeys.",
@@ -150,17 +152,6 @@
           "Manually capture non-Spoon hotkeys.",
           ""
         ],
-        "def" : "CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)",
-        "doc" : "Manually capture non-Spoon hotkeys.\n\nParameters:\n * hotkey_group_name - a string\n * action_and_bindSpec_map_or_hotkey_name -\n   * if a table - { hotkey_name = { { mods }, \"key\" } [, ...]}\n     * eg. `spoon.CaptureHotkeys:capture(\"Terminal\", {\n              [\"Select tab n\"] = { {\"⌘\"}, \"n\" },\n              [\"Select last tab\"] = { {\"⌘\"}, \"9\" },\n            })`\n   * if a string - hotkey_name\n     * eg. `spoon.CaptureHotkeys:capture(\"Stay\", \"Toggle layout engine or report frontmost window\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\")`\n\nReturns:\n * The CaptureHotkeys object",
-        "notes" : [
-
-        ],
-        "signature" : "CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)",
-        "type" : "Method",
-        "returns" : [
-          " * The CaptureHotkeys object"
-        ],
-        "name" : "capture",
         "parameters" : [
           " * hotkey_group_name - a string",
           " * action_and_bindSpec_map_or_hotkey_name -",
@@ -172,7 +163,18 @@
           "   * if a string - hotkey_name",
           "     * eg. `spoon.CaptureHotkeys:capture(\"Stay\", \"Toggle layout engine or report frontmost window\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\")`",
           ""
-        ]
+        ],
+        "doc" : "Manually capture non-Spoon hotkeys.\n\nParameters:\n * hotkey_group_name - a string\n * action_and_bindSpec_map_or_hotkey_name -\n   * if a table - { hotkey_name = { { mods }, \"key\" } [, ...]}\n     * eg. `spoon.CaptureHotkeys:capture(\"Terminal\", {\n              [\"Select tab n\"] = { {\"⌘\"}, \"n\" },\n              [\"Select last tab\"] = { {\"⌘\"}, \"9\" },\n            })`\n   * if a string - hotkey_name\n     * eg. `spoon.CaptureHotkeys:capture(\"Stay\", \"Toggle layout engine or report frontmost window\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\")`\n\nReturns:\n * The CaptureHotkeys object",
+        "notes" : [
+
+        ],
+        "signature" : "CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)",
+        "type" : "Method",
+        "returns" : [
+          " * The CaptureHotkeys object"
+        ],
+        "name" : "capture",
+        "def" : "CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)"
       },
       {
         "desc" : "Starts capturing Spoon hotkeys assigned with :bindHotkeys().",
@@ -180,7 +182,10 @@
           "Starts capturing Spoon hotkeys assigned with :bindHotkeys().",
           ""
         ],
-        "def" : "CaptureHotkeys:start()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Starts capturing Spoon hotkeys assigned with :bindHotkeys().\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -191,10 +196,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "start",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:start()"
       },
       {
         "desc" : "Stops CaptureHotkeys.",
@@ -202,7 +204,10 @@
           "Stops CaptureHotkeys.",
           ""
         ],
-        "def" : "CaptureHotkeys:stop()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Stops CaptureHotkeys.\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -213,10 +218,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "stop",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:stop()"
       },
       {
         "desc" : "Hide the hotkeys webview",
@@ -224,7 +226,10 @@
           "Hide the hotkeys webview",
           ""
         ],
-        "def" : "CaptureHotkeys:show()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Hide the hotkeys webview\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -235,10 +240,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "show",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:show()"
       },
       {
         "desc" : "Hide the hotkeys webview",
@@ -246,7 +248,10 @@
           "Hide the hotkeys webview",
           ""
         ],
-        "def" : "CaptureHotkeys:hide()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Hide the hotkeys webview\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -257,10 +262,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "hide",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:hide()"
       },
       {
         "desc" : "Show if hidden, Hide if visible, the hotkeys webview",
@@ -268,7 +270,10 @@
           "Show if hidden, Hide if visible, the hotkeys webview",
           ""
         ],
-        "def" : "CaptureHotkeys:toggleList()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Show if hidden, Hide if visible, the hotkeys webview\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -279,10 +284,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "toggleList",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:toggleList()"
       },
       {
         "desc" : "Binds hotkeys for CaptureHotkeys",
@@ -290,7 +292,10 @@
           "Binds hotkeys for CaptureHotkeys",
           ""
         ],
-        "def" : "CaptureHotkeys:bindHotkeys(mapping)",
+        "parameters" : [
+          " * mapping - A table containing hotkey objifier\/key details for the following items:",
+          "  * top_left, top_right, bottom_left, bottom_right - resize and move the window to the corresponding quarter of the screen"
+        ],
         "doc" : "Binds hotkeys for CaptureHotkeys\n\nParameters:\n * mapping - A table containing hotkey objifier\/key details for the following items:\n  * top_left, top_right, bottom_left, bottom_right - resize and move the window to the corresponding quarter of the screen",
         "notes" : [
 
@@ -301,15 +306,13 @@
 
         ],
         "name" : "bindHotkeys",
-        "parameters" : [
-          " * mapping - A table containing hotkey objifier\/key details for the following items:",
-          "  * top_left, top_right, bottom_left, bottom_right - resize and move the window to the corresponding quarter of the screen"
-        ]
+        "def" : "CaptureHotkeys:bindHotkeys(mapping)"
       }
     ],
     "Command" : [
 
     ],
+    "doc" : "Capture Spoon hotkeys as they are assigned, capture arbitrary hotkeys, and display them all.\nA Spoon for Hammerspoon.\n\nIn your `~\/.hammerspoon\/init.lua`, ...\nAdd `hs.loadSpoon(\"CaptureHotkeys\")` before any other Spoons or hotkeys you want to capture.\nAssign a hotkey to display captured hotkeys: `spoon.CaptureHotkeys:bindHotkeys({show = {{ \"⌘\", \"⌥\", \"⌃\", \"⇧\" }, \"k\"}})`.\nStart capturing: `spoon.CaptureHotkeys:start()`\nLoad your other spoons.\n\nExample `~\/.hammerspoon\/init.lua`:\n\n    hs.loadSpoon(\"CaptureHotkeys\")\n    spoon.CaptureHotkeys:bindHotkeys({show = {{ \"⌘\", \"⌥\", \"⌃\", \"⇧\" }, \"k\"}})\n    spoon.CaptureHotkeys:start()\n\n    ...",
     "items" : [
       {
         "desc" : "Table containing a sample set of hotkeys that can be --- assigned to the different operations. These are not bound",
@@ -324,7 +327,9 @@
           " }",
           "```"
         ],
-        "def" : "CaptureHotkeys.defaultHotkeys",
+        "parameters" : [
+
+        ],
         "doc" : "Table containing a sample set of hotkeys that can be --- assigned to the different operations. These are not bound\nby default - if you want to use them you have to call:\n`spoon.CaptureHotkeys:bindHotkeys(spoon.CaptureHotkeys.defaultHotkeys)`\nafter loading the spoon. Value:\n```\n {\n   show = { {\"ctrl\", \"alt\", \"cmd\", \"shift\"}, \"k\" },\n }\n```",
         "notes" : [
 
@@ -335,14 +340,12 @@
 
         ],
         "name" : "defaultHotkeys",
-        "parameters" : [
-
-        ]
+        "def" : "CaptureHotkeys.defaultHotkeys"
       },
       {
         "desc" : "Exporters for various formats.",
         "stripped_doc" : [
-          "Exporters for various formats. ",
+          "Exporters for various formats.",
           "",
           "Currently:",
           "html - CaptureHotkeys.exporters.html:to_html() (or `…exporters.html()`)",
@@ -351,8 +354,10 @@
           "keyCue - spoon.CaptureHotkeys.exporters.keyCue.export_to_file() (or `…exporters.keyCue()`)",
           "write a custom shortcuts file for \"KeyCue.app\"[http:\/\/www.ergonis.com\/products\/keycue\/] to `build\/HammerspoonHotkeys.kcustom`"
         ],
-        "def" : "CaptureHotkeys.exporters",
-        "doc" : "Exporters for various formats. \n\nCurrently:\nhtml - CaptureHotkeys.exporters.html:to_html() (or `…exporters.html()`)\nan HTML string used for the default hotkey view ( `CaptureHotkeys:show()` )\n\nkeyCue - spoon.CaptureHotkeys.exporters.keyCue.export_to_file() (or `…exporters.keyCue()`)\nwrite a custom shortcuts file for \"KeyCue.app\"[http:\/\/www.ergonis.com\/products\/keycue\/] to `build\/HammerspoonHotkeys.kcustom`",
+        "parameters" : [
+
+        ],
+        "doc" : "Exporters for various formats.\n\nCurrently:\nhtml - CaptureHotkeys.exporters.html:to_html() (or `…exporters.html()`)\nan HTML string used for the default hotkey view ( `CaptureHotkeys:show()` )\n\nkeyCue - spoon.CaptureHotkeys.exporters.keyCue.export_to_file() (or `…exporters.keyCue()`)\nwrite a custom shortcuts file for \"KeyCue.app\"[http:\/\/www.ergonis.com\/products\/keycue\/] to `build\/HammerspoonHotkeys.kcustom`",
         "notes" : [
 
         ],
@@ -362,16 +367,16 @@
 
         ],
         "name" : "exporters",
-        "parameters" : [
-
-        ]
+        "def" : "CaptureHotkeys.exporters"
       },
       {
         "desc" : "The captured hotkeys.",
         "stripped_doc" : [
           "The captured hotkeys."
         ],
-        "def" : "CaptureHotkeys.hotkeys",
+        "parameters" : [
+
+        ],
         "doc" : "The captured hotkeys.",
         "notes" : [
 
@@ -382,16 +387,16 @@
 
         ],
         "name" : "hotkeys",
-        "parameters" : [
-
-        ]
+        "def" : "CaptureHotkeys.hotkeys"
       },
       {
         "desc" : "Logger object used within the Spoon. Can be accessed to set the default log level for the messages coming from the Spoon.",
         "stripped_doc" : [
           "Logger object used within the Spoon. Can be accessed to set the default log level for the messages coming from the Spoon."
         ],
-        "def" : "CaptureHotkeys.logger",
+        "parameters" : [
+
+        ],
         "doc" : "Logger object used within the Spoon. Can be accessed to set the default log level for the messages coming from the Spoon.",
         "notes" : [
 
@@ -402,9 +407,7 @@
 
         ],
         "name" : "logger",
-        "parameters" : [
-
-        ]
+        "def" : "CaptureHotkeys.logger"
       },
       {
         "desc" : "Wrapper around hs.hotkey.bind, capturing hotkeys on the way.",
@@ -412,7 +415,13 @@
           "Wrapper around hs.hotkey.bind, capturing hotkeys on the way.",
           ""
         ],
-        "def" : "CaptureHotkeys:bind(hotkey_group_name, hotkey_name, ...)",
+        "parameters" : [
+          " * hotkey_group_name - a string, the group heading in hotkey reports",
+          " * hotkey_name - a string, the key name in hotkey reports",
+          "   * eg. `CaptureHotkeys:bind(hotkey_group_name, hotkey_name, { mods }, key, function)`",
+          "   * eg. `CaptureHotkeys:bind(\"Layout engine\", \"Toggle layout engine\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\", function() ... end )`",
+          ""
+        ],
         "doc" : "Wrapper around hs.hotkey.bind, capturing hotkeys on the way.\n\nParameters:\n * hotkey_group_name - a string, the group heading in hotkey reports\n * hotkey_name - a string, the key name in hotkey reports\n   * eg. `CaptureHotkeys:bind(hotkey_group_name, hotkey_name, { mods }, key, function)`\n   * eg. `CaptureHotkeys:bind(\"Layout engine\", \"Toggle layout engine\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\", function() ... end )`\n\nReturns:\n * The bound hotkey",
         "notes" : [
 
@@ -423,13 +432,7 @@
           " * The bound hotkey"
         ],
         "name" : "bind",
-        "parameters" : [
-          " * hotkey_group_name - a string, the group heading in hotkey reports",
-          " * hotkey_name - a string, the key name in hotkey reports",
-          "   * eg. `CaptureHotkeys:bind(hotkey_group_name, hotkey_name, { mods }, key, function)`",
-          "   * eg. `CaptureHotkeys:bind(\"Layout engine\", \"Toggle layout engine\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\", function() ... end )`",
-          ""
-        ]
+        "def" : "CaptureHotkeys:bind(hotkey_group_name, hotkey_name, ...)"
       },
       {
         "desc" : "Binds hotkeys for CaptureHotkeys",
@@ -437,7 +440,10 @@
           "Binds hotkeys for CaptureHotkeys",
           ""
         ],
-        "def" : "CaptureHotkeys:bindHotkeys(mapping)",
+        "parameters" : [
+          " * mapping - A table containing hotkey objifier\/key details for the following items:",
+          "  * top_left, top_right, bottom_left, bottom_right - resize and move the window to the corresponding quarter of the screen"
+        ],
         "doc" : "Binds hotkeys for CaptureHotkeys\n\nParameters:\n * mapping - A table containing hotkey objifier\/key details for the following items:\n  * top_left, top_right, bottom_left, bottom_right - resize and move the window to the corresponding quarter of the screen",
         "notes" : [
 
@@ -448,10 +454,7 @@
 
         ],
         "name" : "bindHotkeys",
-        "parameters" : [
-          " * mapping - A table containing hotkey objifier\/key details for the following items:",
-          "  * top_left, top_right, bottom_left, bottom_right - resize and move the window to the corresponding quarter of the screen"
-        ]
+        "def" : "CaptureHotkeys:bindHotkeys(mapping)"
       },
       {
         "desc" : "Manually capture non-Spoon hotkeys.",
@@ -459,17 +462,6 @@
           "Manually capture non-Spoon hotkeys.",
           ""
         ],
-        "def" : "CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)",
-        "doc" : "Manually capture non-Spoon hotkeys.\n\nParameters:\n * hotkey_group_name - a string\n * action_and_bindSpec_map_or_hotkey_name -\n   * if a table - { hotkey_name = { { mods }, \"key\" } [, ...]}\n     * eg. `spoon.CaptureHotkeys:capture(\"Terminal\", {\n              [\"Select tab n\"] = { {\"⌘\"}, \"n\" },\n              [\"Select last tab\"] = { {\"⌘\"}, \"9\" },\n            })`\n   * if a string - hotkey_name\n     * eg. `spoon.CaptureHotkeys:capture(\"Stay\", \"Toggle layout engine or report frontmost window\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\")`\n\nReturns:\n * The CaptureHotkeys object",
-        "notes" : [
-
-        ],
-        "signature" : "CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)",
-        "type" : "Method",
-        "returns" : [
-          " * The CaptureHotkeys object"
-        ],
-        "name" : "capture",
         "parameters" : [
           " * hotkey_group_name - a string",
           " * action_and_bindSpec_map_or_hotkey_name -",
@@ -481,7 +473,18 @@
           "   * if a string - hotkey_name",
           "     * eg. `spoon.CaptureHotkeys:capture(\"Stay\", \"Toggle layout engine or report frontmost window\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\")`",
           ""
-        ]
+        ],
+        "doc" : "Manually capture non-Spoon hotkeys.\n\nParameters:\n * hotkey_group_name - a string\n * action_and_bindSpec_map_or_hotkey_name -\n   * if a table - { hotkey_name = { { mods }, \"key\" } [, ...]}\n     * eg. `spoon.CaptureHotkeys:capture(\"Terminal\", {\n              [\"Select tab n\"] = { {\"⌘\"}, \"n\" },\n              [\"Select last tab\"] = { {\"⌘\"}, \"9\" },\n            })`\n   * if a string - hotkey_name\n     * eg. `spoon.CaptureHotkeys:capture(\"Stay\", \"Toggle layout engine or report frontmost window\", {\"⌘\", \"⌥\", \"⌃\", \"⇧\"}, \"s\")`\n\nReturns:\n * The CaptureHotkeys object",
+        "notes" : [
+
+        ],
+        "signature" : "CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)",
+        "type" : "Method",
+        "returns" : [
+          " * The CaptureHotkeys object"
+        ],
+        "name" : "capture",
+        "def" : "CaptureHotkeys:capture(hotkey_group_name, action_and_bindSpec_map_or_hotkey_name, ...)"
       },
       {
         "desc" : "Hide the hotkeys webview",
@@ -489,7 +492,10 @@
           "Hide the hotkeys webview",
           ""
         ],
-        "def" : "CaptureHotkeys:hide()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Hide the hotkeys webview\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -500,10 +506,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "hide",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:hide()"
       },
       {
         "desc" : "Hide the hotkeys webview",
@@ -511,7 +514,10 @@
           "Hide the hotkeys webview",
           ""
         ],
-        "def" : "CaptureHotkeys:show()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Hide the hotkeys webview\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -522,10 +528,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "show",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:show()"
       },
       {
         "desc" : "Starts capturing Spoon hotkeys assigned with :bindHotkeys().",
@@ -533,7 +536,10 @@
           "Starts capturing Spoon hotkeys assigned with :bindHotkeys().",
           ""
         ],
-        "def" : "CaptureHotkeys:start()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Starts capturing Spoon hotkeys assigned with :bindHotkeys().\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -544,10 +550,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "start",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:start()"
       },
       {
         "desc" : "Stops CaptureHotkeys.",
@@ -555,7 +558,10 @@
           "Stops CaptureHotkeys.",
           ""
         ],
-        "def" : "CaptureHotkeys:stop()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Stops CaptureHotkeys.\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -566,10 +572,7 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "stop",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:stop()"
       },
       {
         "desc" : "Show if hidden, Hide if visible, the hotkeys webview",
@@ -577,7 +580,10 @@
           "Show if hidden, Hide if visible, the hotkeys webview",
           ""
         ],
-        "def" : "CaptureHotkeys:toggleList()",
+        "parameters" : [
+          " * None",
+          ""
+        ],
         "doc" : "Show if hidden, Hide if visible, the hotkeys webview\n\nParameters:\n * None\n\nReturns:\n * The CaptureHotkeys object",
         "notes" : [
 
@@ -588,14 +594,8 @@
           " * The CaptureHotkeys object"
         ],
         "name" : "toggleList",
-        "parameters" : [
-          " * None",
-          ""
-        ]
+        "def" : "CaptureHotkeys:toggleList()"
       }
-    ],
-    "Field" : [
-
     ],
     "name" : "CaptureHotkeys"
   }

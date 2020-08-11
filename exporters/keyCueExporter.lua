@@ -26,6 +26,7 @@ M.modifierKeys = {
   ["⌥"] = M.keyCueModifierFlags.NSEventModifierFlagOption,
 }
 M.keyCodes = setmetatable({
+  ["⏎"] = 36,
   ["␣"] = 49,
   ["←"] = 123,
   ["→"] = 124,
